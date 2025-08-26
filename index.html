@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>나리타 공항 교통편 대화형 비교</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: A single-page dashboard designed to help users decide on Narita airport transportation. The structure flows from a high-level, side-by-side comparison of "Convenience" vs. "Cost-Effectiveness" to a detailed interactive chart, and finally to a personalized recommendation section. This top-down approach allows users to quickly grasp the main options and then drill down into quantitative data and personalized suggestions, making the decision-making process intuitive and efficient. -->
+    <!-- Visualization & Content Choices: Report Info: Cost & Time data -> Goal: Compare -> Viz: Interactive Bar Chart (Chart.js) -> Interaction: Buttons to toggle data between 'Cost' and 'Time' -> Justification: A bar chart provides a clear, immediate visual comparison of numerical data. Toggling the data focus keeps the UI clean and user-directed. Report Info: Pros/Cons -> Goal: Organize/Inform -> Viz: Collapsible accordions -> Interaction: Click to expand -> Justification: Hides detailed text to prevent initial overload, allowing users to explore details as needed. Report Info: Conclusion -> Goal: Guide -> Viz: Recommendation buttons -> Interaction: Click to highlight the best option -> Justification: Provides a clear, actionable takeaway based on user's travel style. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #FDFBF6;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 40vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .transport-card {
+            transition: all 0.3s ease-in-out;
+            border: 2px solid transparent;
+        }
+        .highlight {
+            border-color: #D97706;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-6xl">
+
+        <header class="text-center mb-10">
+            <h1 class="text-4xl md:text-5xl font-bold text-slate-900 mb-2">나리타 공항 교통편 선택 가이드</h1>
+            <p class="text-lg text-slate-600">나의 여행 스타일에 맞는 최적의 이동 방법을 찾아보세요.</p>
+        </header>
+
+        <main>
+            <section id="comparison" class="mb-12">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold mb-2">어떤 스타일을 선호하시나요?</h2>
+                    <p class="text-slate-600">여행의 우선순위에 따라 두 가지 주요 선택지를 비교해 보세요.</p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <article id="card-nex" class="transport-card bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-2xl font-bold text-amber-700 mb-4 text-center">🚀 편리함 우선</h3>
+                        <div class="text-center mb-4">
+                            <p class="text-xl font-semibold">나리타 익스프레스 (N'EX)</p>
+                            <p class="text-slate-500">환승 없이 한 번에, 빠르고 쾌적하게</p>
+                        </div>
+                        <ul class="space-y-2 text-slate-700">
+                            <li class="flex items-start"><span class="mr-2 text-green-500">✔</span> <strong>장점:</strong> 신주쿠/시부야까지 환승 없이 직행하여 매우 편리합니다. 지정 좌석제로 편안하며, 짐 보관 공간도 넓습니다.</li>
+                            <li class="flex items-start"><span class="mr-2 text-red-500">✖</span> <strong>단점:</strong> 다른 교통편에 비해 요금이 비싼 편입니다.</li>
+                        </ul>
+                    </article>
+                    <article id="card-budget" class="transport-card bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-2xl font-bold text-teal-700 mb-4 text-center">💰 가성비 우선</h3>
+                        <div class="text-center mb-4">
+                            <p class="text-xl font-semibold">일반 열차 & 버스</p>
+                            <p class="text-slate-500">저렴한 요금으로 알뜰하게</p>
+                        </div>
+                        <ul class="space-y-2 text-slate-700">
+                           <li class="flex items-start"><span class="mr-2 text-green-500">✔</span> <strong>장점:</strong> 교통비를 크게 절약할 수 있어 경제적입니다. 현지인처럼 대중교통을 경험해볼 수 있습니다.</li>
+                           <li class="flex items-start"><span class="mr-2 text-red-500">✖</span> <strong>단점:</strong> 최소 1회 이상 환승이 필요하며, 출퇴근 시간에는 매우 혼잡할 수 있습니다.</li>
+                        </ul>
+                    </article>
+                </div>
+            </section>
+
+            <section id="chart-section" class="mb-12 bg-white rounded-xl shadow-lg p-6">
+                <div class="text-center mb-6">
+                    <h2 class="text-3xl font-bold mb-2">데이터로 비교하기</h2>
+                    <p class="text-slate-600">버튼을 클릭하여 요금과 소요 시간을 시각적으로 비교해 보세요.</p>
+                    <div id="chart-controls" class="mt-4 space-x-2">
+                        <button data-type="cost" class="control-btn bg-amber-600 text-white py-2 px-4 rounded-lg shadow hover:bg-amber-700 transition">요금 비교 (엔)</button>
+                        <button data-type="time" class="control-btn bg-slate-200 text-slate-800 py-2 px-4 rounded-lg shadow hover:bg-slate-300 transition">소요 시간 비교 (분)</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="transportChart"></canvas>
+                </div>
+            </section>
+            
+            <section id="recommendation" class="text-center">
+                 <h2 class="text-3xl font-bold mb-2">나에게 맞는 선택은?</h2>
+                 <p class="text-slate-600 mb-6">자신의 여행 스타일에 맞는 버튼을 눌러 추천 교통편을 확인하세요.</p>
+                 <div class="flex flex-wrap justify-center gap-4">
+                     <button data-rec="nex" class="rec-btn bg-white border border-amber-600 text-amber-700 py-2 px-5 rounded-full shadow-sm hover:bg-amber-50 transition">👨‍👩‍👧‍👦 짐 많은 가족 여행</button>
+                     <button data-rec="budget" class="rec-btn bg-white border border-teal-600 text-teal-700 py-2 px-5 rounded-full shadow-sm hover:bg-teal-50 transition">🎒 예산 절약 배낭여행</button>
+                     <button data-rec="nex" class="rec-btn bg-white border border-amber-600 text-amber-700 py-2 px-5 rounded-full shadow-sm hover:bg-amber-50 transition">⏰ 시간이 금! 비즈니스 여행</button>
+                 </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        const transportData = {
+            labels: ["나리타 익스프레스", "게이세이+JR", "고속버스+JR"],
+            cost: {
+                label: '예상 요금 (엔)',
+                data: [3250, 1350, 1700], 
+                backgroundColor: 'rgba(217, 119, 6, 0.7)',
+                borderColor: 'rgba(217, 119, 6, 1)',
+            },
+            time: {
+                label: '예상 소요 시간 (분)',
+                data: [80, 95, 100],
+                backgroundColor: 'rgba(15, 118, 110, 0.7)',
+                borderColor: 'rgba(15, 118, 110, 1)',
+            }
+        };
+
+        const ctx = document.getElementById('transportChart').getContext('2d');
+        let transportChart;
+
+        function createChart(dataType) {
+            if (transportChart) {
+                transportChart.destroy();
+            }
+            
+            const chartData = transportData[dataType];
+
+            transportChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: transportData.labels,
+                    datasets: [{
+                        label: chartData.label,
+                        data: chartData.data,
+                        backgroundColor: chartData.backgroundColor,
+                        borderColor: chartData.borderColor,
+                        borderWidth: 1,
+                        borderRadius: 5,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: chartData.label,
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        y: {
+                           ticks: {
+                               font: {
+                                   size: 14,
+                               }
+                           }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.x !== null) {
+                                        label += context.parsed.x + (dataType === 'cost' ? ' 엔' : ' 분');
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        const controlButtons = document.querySelectorAll('.control-btn');
+        controlButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const dataType = button.dataset.type;
+                createChart(dataType);
+                
+                controlButtons.forEach(btn => {
+                    btn.classList.remove('bg-amber-600', 'text-white');
+                    btn.classList.add('bg-slate-200', 'text-slate-800');
+                });
+                button.classList.add('bg-amber-600', 'text-white');
+                button.classList.remove('bg-slate-200', 'text-slate-800');
+            });
+        });
+
+        const recButtons = document.querySelectorAll('.rec-btn');
+        const cards = {
+            nex: document.getElementById('card-nex'),
+            budget: document.getElementById('card-budget')
+        };
+
+        recButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const recommendation = button.dataset.rec;
+                
+                Object.values(cards).forEach(card => card.classList.remove('highlight'));
+                
+                if (cards[recommendation]) {
+                    cards[recommendation].classList.add('highlight');
+                    cards[recommendation].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            });
+        });
+
+        window.onload = () => {
+            createChart('cost');
+        };
+    </script>
+</body>
+</html>
